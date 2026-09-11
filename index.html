@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartCalc | Kalkulačka</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <div class="app-frame">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="brand-wrap">
+                    <span class="brand-icon">
+                        <i class="fa-solid fa-calculator"></i>
+                    </span>
+                    <div>
+                        <span class="brand-kicker">SmartCalc</span>
+                        <span class="brand-title">Workspace</span>
+                    </div>
+                </div>
+                <button class="icon-button theme-button" id="themeToggle">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+
+            <nav class="nav-panel">
+                <span class="nav-label">Kalkulačka</span>
+                <a class="nav-link active" href="#">
+                    <i class="fa-solid fa-grid-2x"></i>
+                    <span>Výpočty</span>
+                </a>
+                <a class="nav-link" href="#">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Historie</span>
+                </a>
+                <a class="nav-link" href="#">
+                    <i class="fa-solid fa-shield-heart"></i>
+                    <span>Soukromí</span>
+                </a>
+            </nav>
+
+            <section class="privacy-card">
+                <span class="mini-label">Ochrana dat</span>
+                <div class="privacy-status">
+                    <span class="status-dot"></span>
+                    <span>Soukromí aktivní</span>
+                </div>
+                <button class="button button-soft" id="openPrivacy">
+                    <i class="fa-solid fa-cookie"></i>
+                    Správa cookies
+                </button>
+            </section>
+        </aside>
+
+        <main class="main-content">
+            <section class="content-head">
+                <div>
+                    <span class="section-kicker">Kalkulátor</span>
+                    <h1>Moderní výpočty</h1>
+                </div>
+                <div class="head-actions">
+                    <button class="icon-button" id="termsButton">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                    <button class="button button-primary" id="historyButton">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Historie
+                    </button>
+                </div>
+            </section>
+
+            <section class="calc-layout">
+                <section class="calculator-card">
+                    <section class="display-wrap">
+                        <div class="display-top">
+                            <span class="display-mode">Standard</span>
+                            <span class="display-date" id="clockDate"></span>
+                        </div>
+                        <div class="previous-expression" id="previousExpression"></div>
+                        <div class="display" id="display">0</div>
+                    </section>
+
+                    <section class="calculator-grid">
+                        <button class="btn dangerous" onclick="clearAll()">C</button>
+                        <button class="btn utility" onclick="deleteLast()">DEL</button>
+                        <button class="btn utility" onclick="appendOperator('%')">%</button>
+                        <button class="btn operator" onclick="appendOperator('/')">÷</button>
+
+                        <button class="btn number" onclick="appendNumber('7')">7</button>
+                        <button class="btn number" onclick="appendNumber('8')">8</button>
+                        <button class="btn number" onclick="appendNumber('9')">9</button>
+                        <button class="btn operator" onclick="appendOperator('*')">×</button>
+
+                        <button class="btn number" onclick="appendNumber('4')">4</button>
+                        <button class="btn number" onclick="appendNumber('5')">5</button>
+                        <button class="btn number" onclick="appendNumber('6')">6</button>
+                        <button class="btn operator" onclick="appendOperator('-')">−</button>
+
+                        <button class="btn number" onclick="appendNumber('1')">1</button>
+                        <button class="btn number" onclick="appendNumber('2')">2</button>
+                        <button class="btn number" onclick="appendNumber('3')">3</button>
+                        <button class="btn operator" onclick="appendOperator('+')">+</button>
+
+                        <button class="btn number span-two" onclick="appendNumber('0')">0</button>
+                        <button class="btn number" onclick="appendDecimal()">,</button>
+                        <button class="btn equals" onclick="calculate()">=</button>
+                    </section>
+
+                    <section class="memory-strip">
+                        <button class="memory-button" id="memoryAdd">M+</button>
+                        <button class="memory-button" id="memorySub">M−</button>
+                        <button class="memory-button" id="memoryRecall">MR</button>
+                        <button class="memory-button" id="memoryClear">MC</button>
+                    </section>
+                </section>
+
+                <aside class="insights-panel">
+                    <section class="insights-card">
+                        <div class="insights-head">
+                            <span class="mini-label">Zajímavost dne</span>
+                            <button class="icon-button small-icon" id="factButton">
+                                <i class="fa-solid fa-shuffle"></i>
+                            </button>
+                        </div>
+                        <div class="fact-wrap">
+                            <span class="fact-icon">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </span>
+                            <span class="fact-text" id="factText">
+                                Číslo π je iracionální a používá se v geometrii.
+                            </span>
+                        </div>
+                    </section>
+
+                    <section class="insights-card">
+                        <div class="insights-head">
+                            <span class="mini-label">Historie</span>
+                            <span class="history-counter" id="historyCount">0</span>
+                        </div>
+                        <div class="history-list" id="historyList">
+                            <span class="empty-history">Zatím bez výpočtů</span>
+                        </div>
+                    </section>
+
+                    <section class="insights-card usage-card">
+                        <div class="insights-head">
+                            <span class="mini-label">Vyhodnocení</span>
+                        </div>
+                        <div class="usage-metrics">
+                            <div>
+                                <span class="metric-value" id="calculationMetric">0</span>
+                                <span class="metric-label">Výpočtů</span>
+                            </div>
+                            <div>
+                                <span class="metric-value" id="statusMetric">Aktivní</span>
+                                <span class="metric-label">Status</span>
+                            </div>
+                        </div>
+                    </section>
+                </aside>
+            </section>
+        </main>
+    </div>
+
+    <section class="cookie-banner" id="cookieBanner">
+        <div class="cookie-content">
+            <div class="cookie-copy">
+                <span class="cookie-title">Souhlas s cookies a ochranou dat</span>
+                <p>Na tomto webu používáme pouze nezbytné cookies pro provoz aplikace. Můžete si vybrat další kategorie.</p>
+            </div>
+            <div class="cookie-actions">
+                <button class="button button-soft" id="settingsCookies">Nastavení</button>
+                <button class="button button-primary cookie-button" id="acceptNecessary">Jen nezbytné</button>
+                <button class="button button-primary cookie-button" id="acceptAllCookies">Přijmout vše</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="modal-backdrop" id="termsModal">
+        <div class="modal-card terms-card">
+            <div class="modal-header">
+                <div>
+                    <span class="section-kicker">Podmínky a soukromí</span>
+                    <h2>Všeobecné podmínky</h2>
+                </div>
+                <button class="icon-button close-button" id="closeTerms">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="terms-content">
+                <div class="terms-grid">
+                    <article>
+                        <span class="rule-label">1. Provoz</span>
+                        <p>SmartCalc poskytuje uživateli možnost provádět základní matematické výpočty v prohlížeči. Aplikace pracuje lokálně v rámci zařízení.</p>
+                    </article>
+                    <article>
+                        <span class="rule-label">2. Ochrana osobních údajů</span>
+                        <p>Nezpracováváme osobní údaje. V prohlížeči se ukládá pouze souhlas s cookies a lokální nastavení aplikace.</p>
+                    </article>
+                    <article>
+                        <span class="rule-label">3. Cookies</span>
+                        <p>Nezbytné cookies jsou povinné pro běh aplikace. Volitelné cookies lze odmítnout nebo povolit v nastavení.</p>
+                    </article>
+                    <article>
+                        <span class="rule-label">4. Odpovědnost</span>
+                        <p>Uživatel je odpovědný za správnost vstupů a výsledků. Výsledky je třeba ověřit při důležitých výpočtech.</p>
+                    </article>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="button button-soft" id="modalReject">Zavřít</button>
+                <button class="button button-primary" id="modalAccept">Rozumím</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="modal-backdrop" id="cookieModal">
+        <div class="modal-card cookie-modal-card">
+            <div class="modal-header">
+                <div>
+                    <span class="section-kicker">Nastavení cookies</span>
+                    <h2>Správa cookies</h2>
+                </div>
+                <button class="icon-button close-button" id="closeCookieSettings">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="cookie-settings">
+                <div class="setting-row">
+                    <div>
+                        <span class="setting-title">Nezbytné cookies</span>
+                        <span class="setting-copy">Nutné pro provoz webu a bezpečný běh aplikace.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="necessaryCookies" checked disabled>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div>
+                        <span class="setting-title">Preferenční cookies</span>
+                        <span class="setting-copy">Ukládají nastavení vzhledu a preferencí.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="preferenceCookies">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div>
+                        <span class="setting-title">Analytické cookies</span>
+                        <span class="setting-copy">Pomáhají měřit výkon a používání aplikace.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="analyticsCookies">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div>
+                        <span class="setting-title">Marketingové cookies</span>
+                        <span class="setting-copy">Používají se pro cílené marketingové kampaně.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="marketingCookies">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="button button-soft" id="cookieCancel">Zavřít</button>
+                <button class="button button-primary" id="saveCookies">Uložit nastavení</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>

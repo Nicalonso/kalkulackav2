@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderní Kalkulačka</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome pro ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for active state animations and scrollbars */
+        .btn-press {
+            transition: all 0.1s ease-in-out;
+        }
+        .btn-press:active {
+            transform: scale(0.93);
+        }
+        /* Hide scrollbar for display */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 min-h-screen flex items-center justify-center p-4 transition-colors duration-300 font-sans select-none">
+
+    <!-- Hlavní kontejner kalkulačky -->
+    <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 transition-colors duration-300 flex flex-col">
+        
+        <!-- Hlavička s přepínačem motivu -->
+        <div class="flex justify-between items-center px-6 pt-5 pb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Kalkulačka</span>
+            <button id="themeToggle" class="text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none" title="Přepnout režim">
+                <i class="fa-solid font-bold text-lg fa-moon dark:hidden"></i>
+                <i class="fa-solid font-bold text-lg fa-sun hidden dark:inline"></i>
+            </button>
+        </div>
+
+        <!-- Displej kalkulačky -->
+        <div class="px-6 py-4 text-right flex flex-col justify-end min-h-[120px] bg-slate-50 dark:bg-slate-800/50 mx-4 rounded-2xl mb-4 border border-slate-100 dark:border-slate-700/50">
+            <!-- Historie / předchozí výraz -->
+            <div id="previousExpression" class="text-sm font-medium text-slate-400 dark:text-slate-500 h-6 overflow-x-auto no-scrollbar whitespace-nowrap"></div>
+            <!-- Hlavní vstup / výsledek -->
+            <div id="display" class="text-4xl font-bold text-slate-800 dark:text-white overflow-x-auto no-scrollbar whitespace-nowrap tracking-tight">0</div>
+        </div>
+
+        <!-- Mřížka s tlačítky -->
+        <div class="grid grid-cols-4 gap-3 p-6 pt-2 bg-white dark:bg-slate-800">
+            <!-- Řádek 1 -->
+            <button onclick="clearAll()" class="btn-press bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 font-bold p-4 rounded-2xl text-xl focus:outline-none">C</button>
+            <button onclick="deleteLast()" class="btn-press bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 font-semibold p-4 rounded-2xl text-lg focus:outline-none">DEL</button>
+            <button onclick="appendOperator('%')" class="btn-press bg-slate-100 dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 hover:bg-slate-200 dark:hover:bg-slate-600 font-bold p-4 rounded-2xl text-xl focus:outline-none">%</button>
+            <button onclick="appendOperator('/')" class="btn-press bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 font-bold p-4 rounded-2xl text-xl focus:outline-none">÷</button>
+
+            <!-- Řádek 2 -->
+            <button onclick="appendNumber('7')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">7</button>
+            <button onclick="appendNumber('8')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">8</button>
+            <button onclick="appendNumber('9')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">9</button>
+            <button onclick="appendOperator('*')" class="btn-press bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 font-bold p-4 rounded-2xl text-xl focus:outline-none">×</button>
+
+            <!-- Řádek 3 -->
+            <button onclick="appendNumber('4')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">4</button>
+            <button onclick="appendNumber('5')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">5</button>
+            <button onclick="appendNumber('6')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">6</button>
+            <button onclick="appendOperator('-')" class="btn-press bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 font-bold p-4 rounded-2xl text-xl focus:outline-none">−</button>
+
+            <!-- Řádek 4 -->
+            <button onclick="appendNumber('1')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">1</button>
+            <button onclick="appendNumber('2')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">2</button>
+            <button onclick="appendNumber('3')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">3</button>
+            <button onclick="appendOperator('+')" class="btn-press bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 font-bold p-4 rounded-2xl text-xl focus:outline-none">+</button>
+
+            <!-- Řádek 5 -->
+            <button onclick="appendNumber('0')" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold p-4 rounded-2xl text-xl focus:outline-none">0</button>
+            <button onclick="appendDecimal()" class="btn-press bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold p-4 rounded-2xl text-xl focus:outline-none">,</button>
+            <button onclick="calculate()" class="btn-press col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-4 rounded-2xl text-2xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-900/40 focus:outline-none">=</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Prvky
+        const display = document.getElementById('display');
+        const previousExpressionDisplay = document.getElementById('previousExpression');
+        const themeToggleBtn = document.getElementById('themeToggle');
+
+        // Stavové proměnné
+        let currentInput = '0';
+        let previousInput = '';
+        let operator = null;
+        let shouldResetDisplay = false;
+
+        // --- Tmavý / Světlý režim ---
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // --- Logika kalkulačky ---
+
+        // Aktualizace displeje
+        function updateDisplay() {
+            display.innerText = currentInput.replace('.', ',');
+            if (operator !== null) {
+                let symbol = operator;
+                if (operator === '*') symbol = '×';
+                if (operator === '/') symbol = '÷';
+                if (operator === '-') symbol = '−';
+                previousExpressionDisplay.innerText = `${previousInput.replace('.', ',')} ${symbol}`;
+            } else {
+                previousExpressionDisplay.innerText = '';
+            }
+        }
+
+        // Přidání čísla
+        function appendNumber(number) {
+            if (currentInput === '0' || shouldResetDisplay) {
+                currentInput = number;
+                shouldResetDisplay = false;
+            } else {
+                if (currentInput.length < 12) { // Omezení délky vstupu
+                    currentInput += number;
+                }
+            }
+            updateDisplay();
+        }
+
+        // Přidání desetinné čárky
+        function appendDecimal() {
+            if (shouldResetDisplay) {
+                currentInput = '0.';
+                shouldResetDisplay = false;
+            } else if (!currentInput.includes('.')) {
+                currentInput += '.';
+            }
+            updateDisplay();
+        }
+
+        // Přidání operátoru
+        function appendOperator(op) {
+            if (operator !== null && !shouldResetDisplay) {
+                calculate();
+            }
+            previousInput = currentInput;
+            operator = op;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        // Výpočet výsledku
+        function calculate() {
+            if (operator === null || shouldResetDisplay) return;
+
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            if (isNaN(prev) || isNaN(current)) return;
+
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        currentInput = 'Chyba';
+                        operator = null;
+                        previousInput = '';
+                        shouldResetDisplay = true;
+                        updateDisplay();
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+                case '%':
+                    result = (prev * current) / 100;
+                    break;
+                default:
+                    return;
+            }
+
+            // Zaokrouhlení pro zamezení nepřesností plovoucí řádové čárky
+            result = Math.round(result * 100000000) / 100000000;
+            
+            currentInput = result.toString();
+            operator = null;
+            previousInput = '';
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        // Vymazání všeho (C)
+        function clearAll() {
+            currentInput = '0';
+            previousInput = '';
+            operator = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        // Vymazání jednoho znaku (DEL)
+        function deleteLast() {
+            if (shouldResetDisplay) return;
+            if (currentInput.length === 1 || (currentInput.length === 2 && currentInput.startsWith('-'))) {
+                currentInput = '0';
+            } else {
+                currentInput = currentInput.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        // --- Podpora klávesnice ---
+        window.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                appendNumber(e.key);
+            } else if (e.key === '.' || e.key === ',') {
+                appendDecimal();
+            } else if (e.key === '+') {
+                appendOperator('+');
+            } else if (e.key === '-') {
+                appendOperator('-');
+            } else if (e.key === '*') {
+                appendOperator('*');
+            } else if (e.key === '/') {
+                e.preventDefault(); // Zaznamená lomítko bez otevření vyhledávání v prohlížeči
+                appendOperator('/');
+            } else if (e.key === '%') {
+                appendOperator('%');
+            } else if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
+                calculate();
+            } else if (e.key === 'Backspace') {
+                deleteLast();
+            } else if (e.key === 'Escape') {
+                clearAll();
+            }
+        });
+    </script>
+</body>
+</html>
